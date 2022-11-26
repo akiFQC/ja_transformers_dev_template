@@ -8,8 +8,7 @@ flake8
 fugashi[unidic-lite]
 fugashi[unidic]
 ginza
-ginza
-ginza 
+gradio
 ipykernel
 ipywidgets
 isort
