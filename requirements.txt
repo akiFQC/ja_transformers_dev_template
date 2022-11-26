@@ -3,7 +3,6 @@ SudachiTra
 accelerate
 autoflake
 black 
-deepspeed>=0.7.5
 fairscale
 flake8
 fugashi[unidic-lite]
@@ -33,10 +32,16 @@ pytorch-lightning
 scikit-learn
 scipy
 sentencepiece
-spacy[cuda118]
+spacy
 sudachipy  
 tensorboard
 tinydb
 torch==1.13.0+cu116
 tqdm
-transformers
+pyarrow
+fastparquet
+datasets
+evaluate
+PyYAML>=6.0
+py-cpuinfo
+triton==1.0

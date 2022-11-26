@@ -2,7 +2,7 @@ version: '3'
 
 # Define the dev container with nvidia docker with dockerfile
 services:
-  ja_nlp_dev:
+  dev:
     tty: true
     build: 
       context: .
@@ -17,9 +17,11 @@ services:
       resources:
         reservations:
           devices:
-            - capabilities: [gpu]
+          - driver: nvidia
+            device_ids: ['0',]
+            capabilities: [gpu]
     shm_size: 4gb
     # start jupyer lab with the following command : port 8888
     command: jupyter lab --ip=0.0.0.0 --port 8888 --allow-root --no-browser --NotebookApp.token='' --NotebookApp.password='' --NotebookApp.allow_origin='*' && \
-      tensorboard --logdir /workspace/tensorboard --ip=0.0.0.0 --port 6006 --bind_all --host 0.0.0.0 && \
-      mlflow ui --port 15005 --host 0.0.0.0 
+        tensorboard --logdir /workspace/tensorboard --ip=0.0.0.0 --port 6006 --bind_all --host 0.0.0.0 && \
+        mlflow ui --port 15005 --host 0.0.0.0 --file-store /workspace/mlruns
