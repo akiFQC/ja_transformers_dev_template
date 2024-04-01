@@ -1,5 +1,12 @@
-FROM nvidia/cuda:11.6.1-cudnn8-devel-ubuntu20.04
+FROM nvidia/cuda:12.1.1-cudnn8-devel-ubuntu22.04
 ENV TZ=Asia/Tokyo 
+
+# Install Python
+ENV PYTHON_VERSION 3.10.12
+ENV HOME /root
+ENV PYTHON_ROOT /usr/local/python-$PYTHON_VERSION
+ENV PATH $PYTHON_ROOT/bin:$PATH
+
 
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 WORKDIR /workspace
@@ -21,21 +28,24 @@ RUN apt-get -y install \
     bzip2\
     llvm libncursesw5-dev \
     xz-utils tk-dev libffi-dev liblzma-dev\
-    python3.9-dev python3.9-distutils python3-pip \
+    python3-dev \
+    python3-distutils \
+    python3-pip \
     && apt clean \
     && rm -rf /var/lib/apt/lists/*
 
-RUN apt purge -y python3-yaml
-RUN python3.9 -m pip install -U pip wheel setuptools
+
+RUN python3 -m pip install -U pip wheel setuptools
 
 
-COPY ./requirements.txt /workspace/requirements.txt
-RUN python3.9 -m pip install --upgrade pip && \
-    python3.9 -m pip install -r requirements.txt
-RUN python3.9 -m unidic download
+# install poetry - respects $POETRY_VERSION & $POETRY_HOME
+# Poetryのインストール
+ENV POETRY_HOME=${HOME}/.local/share/pypoetry
+ENV PATH=${POETRY_HOME}/bin:${PATH}
 
-# eport to set alias in .bashrc
-RUN echo "alias python=python3.9" >> ~/.bashrc
-RUN echo "alias pip=pip3.9" >> ~/.bashrc
+RUN curl -sSL https://install.python-poetry.org | python3 -
+RUN poetry config virtualenvs.in-project false && poetry completions bash >> ~/.bash_completion
 
-RUN TORCH_CUDA_ARCH_LIST="7.0;7.5" DS_BUILD_CPU_ADAM=1 DS_BUILD_FUSED_ADAM=1 DS_BUILD_FUSED_LAMB=1 DS_BUILD_TRANSFORMER=1 DS_BUILD_TRANSFORMER_INFERENCE=1 DS_BUILD_UTILS=1 DS_BUILD_AIO=1 DS_BUILD_SPARSE_ATTN=1 python3.9 -m pip install  "transformers[deepspeed]" 
+
+COPY ./pyproject.toml ./poetry.lock* ./
+RUN poetry install
